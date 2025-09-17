@@ -1,15 +1,4 @@
 #!/bin/bash
-
-set_vrr() {
-    if [[ "$1" == "true" ]]; then
-        kscreen-doctor output.1.vrrpolicy.always
-        kscreen-doctor output.2.vrrpolicy.always
-    else
-        kscreen-doctor output.1.vrrpolicy.never
-        kscreen-doctor output.2.vrrpolicy.never
-    fi
-}
-
 start_gamemode() {
     echo "Start Gamemode"
     notify-send "Gamemode Enabled" "Gamemode has been enabled"

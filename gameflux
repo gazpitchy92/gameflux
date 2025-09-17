@@ -1,0 +1,123 @@
+#!/bin/bash
+
+SCRIPT_DIR="/home/gareth/scripts/gamemode"
+
+# Flag files
+scx_file="$SCRIPT_DIR/flags/scx.txt"
+pid_file="$SCRIPT_DIR/flags/pid.txt"
+[ -f "$scx_file" ] || echo "none" > "$scx_file"
+: > "$pid_file"
+
+# Clear ram buffer
+echo 3 | sudo tee /proc/sys/vm/drop_caches
+
+# Parse given flags
+args=()
+scx_set="none"
+fsr4_set=false
+fsync_set=false
+wayland_set=false
+for arg in "$@"; do
+    case "$arg" in
+        --wayland=true)
+            wayland_set=true
+            ;;
+        --wayland=false)
+            wayland_set=false
+            ;;
+        --fsr4=true)
+            fsr4_set=true
+            ;;
+        --fsr4=false)
+            fsr4_set=false
+            ;;
+        --fsync=true)
+            fsync_set=true
+            ;;
+        --fsync=false)
+            fsync_set=false
+            ;;
+        --scx=none|--scx=lavd|--scx=bpfland|--scx=cosmos|--scx=rusty|--scx=p2dq|--scx=flash)
+            scx_set="${arg#--scx=}"
+            ;;
+        *)
+            args+=("$arg")
+            ;;
+    esac
+done
+
+# Get game dir
+for arg in "${args[@]}"; do
+    if [[ "$arg" == /mnt/games/SteamLibrary/steamapps/common/* ]] && [[ "$arg" != *SteamLinuxRuntime_sniper* ]]; then
+        game_exe=$arg
+        game_root=$(dirname "$game_exe")
+        win64_path=$(find "$game_root" -type d -name "Win64" ! -path "$game_root/Engine/*" | head -n 1)
+        game_folder="$win64_path"
+        echo "Game exe: $arg" > /home/gareth/scripts/gamemode/logs/game.txt
+        echo "Game dir: $game_folder" >> /home/gareth/scripts/gamemode/logs/game.txt
+        break
+    fi
+done
+
+# Install optiscalar 
+if [ "$fsr4_set" = true ]; then
+    if [ ! -f "$game_folder/dxgi.dll" ]; then
+        cp -r /home/gareth/scripts/gamemode/OptiScaler/* "$game_folder/"
+        if [ -f "$game_folder/dxgi.dll" ]; then
+            echo "OptiScaler copied successfully" >> /home/gareth/scripts/gamemode/logs/game.txt
+        else
+            echo "OptiScaler copy failed" >> /home/gareth/scripts/gamemode/logs/game.txt
+        fi
+    else
+        echo "OptiScaler already installed" >> /home/gareth/scripts/gamemode/logs/game.txt
+    fi
+elif [ -f "$game_folder/dxgi.dll" ]; then
+    for item in /home/gareth/scripts/gamemode/OptiScaler/*; do
+        name=$(basename "$item")
+        echo "OptiScaler cleanup removing: $game_folder/$name" >> /home/gareth/scripts/gamemode/logs/game.txt
+        rm -rf "$game_folder/$name"
+    done
+fi
+
+# Log settings
+echo "$scx_set" > "$scx_file"
+echo "fsr4: $fsr4_set" >> /home/gareth/scripts/gamemode/logs/game.txt
+echo "fsync: $fsync_set" >> /home/gareth/scripts/gamemode/logs/game.txt
+echo "scx: $scx_set" >> /home/gareth/scripts/gamemode/logs/game.txt
+echo "wayland: $wayland_set" >> /home/gareth/scripts/gamemode/logs/game.txt
+echo "other args: ${args[*]}" >> /home/gareth/scripts/gamemode/logs/game.txt
+ 
+# Build run variables
+envs=()
+if [ "$wayland_set" = "true" ]; then
+    envs+=("LD_PRELOAD='' PROTON_ENABLE_WAYLAND=1")
+fi
+if [ "$fsync_set" = "true" ]; then
+    envs+=("DRI_PRIME=0" "PROTON_USE_NTSYNC=0")
+else
+    envs+=("DRI_PRIME=0" "PROTON_USE_NTSYNC=1" "WINE_DISABLE_FAST_SYNC=0")
+fi
+if [ "$fsr4_set" = "true" ]; then
+    envs+=("PROTON_FSR_UPGRADE=1" "DXIL_SPIRV_CONFIG=wmma_rdna3_workaround" "WINEDLLOVERRIDES=dxgi.dll=n,b")
+fi
+
+# Run the game
+env "${envs[@]}" gamemoderun "${args[@]}" &
+
+# Log game PID numbers
+GAMEMODE_PID=$!
+echo "$GAMEMODE_PID" > "$pid_file"
+sleep 15
+while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
+    GAME_PIDS=$(pgrep -P "$GAMEMODE_PID")
+    for PID in $GAME_PIDS; do
+        if kill -0 "$PID" 2>/dev/null; then
+            current_nice=$(ps -o nice= -p "$PID" | tr -d ' ')
+            if [[ -n "$current_nice" && "$current_nice" != "-" && "$current_nice" =~ [0-9] ]]; then
+                grep -Fxq "$PID" "$pid_file" || echo "$PID" >> "$pid_file"
+                sleep 0.5
+            fi
+        fi
+    done
+    sleep 60
+done
