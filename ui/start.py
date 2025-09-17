@@ -12,13 +12,9 @@ class MonitorApp:
         status_frame.pack(side="top", fill="x", padx=10, pady=10)
 
         tk.Label(status_frame, text="Status:", font=("Arial", 12, "bold"), bg="#1e1e1e", fg="#ffffff").grid(row=0, column=0, sticky="w")
-        tk.Label(status_frame, text="VRR:", font=("Arial", 12, "bold"), bg="#1e1e1e", fg="#ffffff").grid(row=1, column=0, sticky="w")
 
         self.status_label = tk.Label(status_frame, text="", font=("Arial", 12), bg="#1e1e1e", fg="#ffffff")
         self.status_label.grid(row=0, column=1, sticky="w", padx=5)
-
-        self.vrr_label = tk.Label(status_frame, text="", font=("Arial", 12), bg="#1e1e1e", fg="#ffffff")
-        self.vrr_label.grid(row=1, column=1, sticky="w", padx=5)
 
         self.status_indicator = tk.Canvas(status_frame, width=20, height=20, highlightthickness=0, bg="#1e1e1e")
         self.status_indicator.grid(row=0, column=2, padx=10)
@@ -55,8 +51,6 @@ class MonitorApp:
     def update_ui(self):
         status = self.read_file("/home/gareth/scripts/gamemode/flags/status.txt")
         self.status_label.config(text=status)
-        vrr = self.read_file("/home/gareth/scripts/gamemode/flags/vrr.txt")
-        self.vrr_label.config(text=vrr)
 
         color = "#00ff00" if status == "true" else "#ff5555"
         self.status_indicator.delete("all")

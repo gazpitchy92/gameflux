@@ -3,7 +3,6 @@ Game dir: /mnt/games/SteamLibrary/steamapps/common/Witchfire/Witchfire/Binaries/
 OptiScaler copied successfully
 fsr4: true
 fsync: false
-vrr: false
 scx: lavd
 wayland: false
 other args: /home/gareth/.local/share/Steam/ubuntu12_32/steam-launch-wrapper -- /home/gareth/.local/share/Steam/ubuntu12_32/reaper SteamLaunch AppId=3156770 -- /mnt/games/SteamLibrary/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point --verb=waitforexitandrun -- /usr/share/steam/compatibilitytools.d/proton-cachyos-slr/proton waitforexitandrun /mnt/games/SteamLibrary/steamapps/common/Witchfire/Witchfire.exe

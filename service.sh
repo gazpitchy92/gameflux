@@ -29,7 +29,6 @@ update_mode() {
 
 # Setup new boot logs
 echo "false" > "$SCRIPT_DIR/flags/status.txt"
-echo "true" > "$SCRIPT_DIR/flags/vrr.txt"
 > "$SCRIPT_DIR/flags/pid.txt"
 > "$SCRIPT_DIR/flags/downgrade-pid.txt"
 > "$SCRIPT_DIR/logs/pid-log.txt"
