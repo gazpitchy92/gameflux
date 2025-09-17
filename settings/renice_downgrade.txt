@@ -1,0 +1,24 @@
+firefox-bin,15
+Isolated Web Co,15
+Isolated Service,15
+Privileged Cont,15
+Web Content,15
+deskflow,15
+Discord,5
+megasync,15
+crowdsec,15
+opensnitchd,15
+opensnitch-ui,15
+codium,15
+betterbird-bin,15
+syncthing,15
+crowdsec-firewa,15
+deskflow-server,15
+coolercontrold,15
+WebExtensions,15
+Socket Process,5
+Utility Process,5
+forkserver,15
+crashhelper,15
+RDD Process,5
+teams-for-linux,15

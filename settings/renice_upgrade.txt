@@ -1,0 +1,8 @@
+^Z:\mnt\games,-f
+Win64,-f
+wine64,-f
+reaper,-x
+pv-adverb,-f
+wineserver,-f
+xalia.exe,-f
+GameThread,-f
