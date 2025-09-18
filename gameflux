@@ -100,7 +100,7 @@ while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
             current_nice=$(ps -o nice= -p "$PID" | tr -d ' ')
             if [[ -n "$current_nice" && "$current_nice" != "-" && "$current_nice" =~ [0-9] ]]; then
                 grep -Fxq "$PID" "$renice_flag" || echo "$PID" >> "$renice_flag"
-                sleep 0.5
+                sleep 0.25
             fi
         fi
     done
