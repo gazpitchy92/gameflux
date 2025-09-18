@@ -11,12 +11,12 @@ get_settings_values() {
 }
 
 log_gameflux_settings() {
-    echo "fsr4: $fsr4_set" >> $game_logs
-    echo "rdna3: $rdna3_set" >> $game_logs
-    echo "fsync: $fsync_set" >> $game_logs
-    echo "scx: $scx_set" >> $game_logs
-    echo "wayland: $wayland_set" >> $game_logs
-    echo "other args: ${args[*]}" >> $game_logs
+    echo "fsr4: $fsr4_set" >> "$game_logs"
+    echo "rdna3: $rdna3_set" >> "$game_logs"
+    echo "fsync: $fsync_set" >> "$game_logs"
+    echo "scx: $scx_set" >> "$game_logs"
+    echo "wayland: $wayland_set" >> "$game_logs"
+    echo "other args: ${args[*]}" >> "$game_logs"
 }
 
 setup_runner_files() {
