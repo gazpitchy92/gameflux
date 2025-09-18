@@ -46,7 +46,7 @@ for arg in "${args[@]}"; do
         game_root=$(dirname "$game_exe")
         win64_path=$(find "$game_root" -type d -name "Win64" ! -path "$game_root/Engine/*" | head -n 1)
         game_folder="$win64_path"
-        echo "Game exe: $arg" > $game_logs
+        echo "Game exe: $arg" >> $game_logs
         echo "Game dir: $game_folder" >> $game_logs
         break
     fi

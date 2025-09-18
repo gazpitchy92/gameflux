@@ -25,6 +25,9 @@ setup_runner_files() {
     game_logs="/etc/gameflux/logs/game.txt"
     [ -f "$scx_file" ] || echo "none" > "$scx_file"
     : > "$renice_flag"
+    : > "$game_logs"
+    echo "none" > "/etc/gameflux/flags/scx.txt"
+
 }
 
 setup_service_files() {
