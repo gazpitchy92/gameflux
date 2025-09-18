@@ -23,7 +23,6 @@ update_mode() {
         update_scx stop # Stop any schedulers we launched
         update_anaicy start # Reset anaicy to default status if needed
         update_renice reset # Reset renice values of background services
-        clear_ram_buffer # Clear ram buffer to free up space
     fi 
 }
 
