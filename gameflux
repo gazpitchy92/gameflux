@@ -104,5 +104,6 @@ while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
             fi
         fi
     done
+    echo "Waiting 5 seconds"
     sleep 5
 done
