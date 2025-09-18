@@ -104,6 +104,5 @@ while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
             fi
         fi
     done
-    # Sleep time... Zzzzzz
-    sleep 15
+    sleep 5
 done

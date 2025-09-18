@@ -45,7 +45,6 @@ while true; do
             update_mode general
         fi
     fi
-    # Sleep time... Zzzzzz
     echo "Waiting $refresh_time seconds"
     sleep "$refresh_time"
 done
