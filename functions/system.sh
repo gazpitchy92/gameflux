@@ -1,17 +1,7 @@
 #!/bin/bash
 
-check_ram() {
+clear_ram_buffer() {
     echo 3 | sudo tee /proc/sys/vm/drop_caches
-}
-
-reset_mouse() {
-    for usb in /sys/bus/usb/devices/*/; do
-        if [ -f "$usb/product" ] && grep -qi "Wireless" "$usb/product"; then
-            echo "Resetting: $(cat "$usb/product") at $usb"
-            echo 0 > "$usb/authorized" 2>/dev/null
-            echo 1 > "$usb/authorized" 2>/dev/null
-        fi
-    done
 }
 
 update_power() {

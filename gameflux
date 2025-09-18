@@ -15,6 +15,7 @@ echo 3 | sudo tee /proc/sys/vm/drop_caches
 args=()
 scx_set="none"
 fsr4_set=false
+rdna3_set=false
 fsync_set=false
 wayland_set=false
 for arg in "$@"; do
@@ -22,20 +23,14 @@ for arg in "$@"; do
         --wayland=true)
             wayland_set=true
             ;;
-        --wayland=false)
-            wayland_set=false
-            ;;
         --fsr4=true)
             fsr4_set=true
             ;;
-        --fsr4=false)
-            fsr4_set=false
+        --rdna3=true)
+            rdna3_set=true
             ;;
         --fsync=true)
             fsync_set=true
-            ;;
-        --fsync=false)
-            fsync_set=false
             ;;
         --scx=none|--scx=lavd|--scx=bpfland|--scx=cosmos|--scx=rusty|--scx=p2dq|--scx=flash)
             scx_set="${arg#--scx=}"
@@ -82,10 +77,18 @@ fi
 # Log settings
 echo "$scx_set" > "$scx_file"
 echo "fsr4: $fsr4_set" >> /home/gareth/scripts/gamemode/logs/game.txt
+echo "rdna3: $rdna3_set" >> /home/gareth/scripts/gamemode/logs/game.txt
 echo "fsync: $fsync_set" >> /home/gareth/scripts/gamemode/logs/game.txt
 echo "scx: $scx_set" >> /home/gareth/scripts/gamemode/logs/game.txt
 echo "wayland: $wayland_set" >> /home/gareth/scripts/gamemode/logs/game.txt
 echo "other args: ${args[*]}" >> /home/gareth/scripts/gamemode/logs/game.txt
+
+# Setup ini
+if [ "$rdna3_set" = "true" ]; then
+    # TO DO : Update .ini file with flags to enable rdna3
+else
+    # TO DO : Update .ini file with flags to disable rdna3
+fi
  
 # Build run variables
 envs=()
@@ -93,25 +96,33 @@ if [ "$wayland_set" = "true" ]; then
     envs+=("LD_PRELOAD='' PROTON_ENABLE_WAYLAND=1")
 fi
 if [ "$fsync_set" = "true" ]; then
-    envs+=("DRI_PRIME=0" "PROTON_USE_NTSYNC=0")
+    envs+=("PROTON_USE_NTSYNC=0")
 else
-    envs+=("DRI_PRIME=0" "PROTON_USE_NTSYNC=1" "WINE_DISABLE_FAST_SYNC=0")
+    envs+=("PROTON_USE_NTSYNC=1" "WINE_DISABLE_FAST_SYNC=0")
 fi
 if [ "$fsr4_set" = "true" ]; then
-    envs+=("PROTON_FSR_UPGRADE=1" "DXIL_SPIRV_CONFIG=wmma_rdna3_workaround" "WINEDLLOVERRIDES=dxgi.dll=n,b")
+    envs+=("PROTON_FSR_UPGRADE=1")
+fi
+if [ "$rdna3_set" = "true" ]; then
+    envs+=("DXIL_SPIRV_CONFIG=wmma_rdna3_workaround" "WINEDLLOVERRIDES=dxgi.dll=n,b")
+    # TO DO : Update .ini file with flags to enable rdna3
+else
+    # TO DO : Update .ini file with flags to disable rdna3
 fi
 
-# Run the game
+# Launch the game
 env "${envs[@]}" gamemoderun "${args[@]}" &
 
-# Log game PID numbers
+# Log game PID numbers whilst running
 GAMEMODE_PID=$!
 echo "$GAMEMODE_PID" > "$pid_file"
 sleep 15
 while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
     GAME_PIDS=$(pgrep -P "$GAMEMODE_PID")
+    # Parse game PID numbers
     for PID in $GAME_PIDS; do
         if kill -0 "$PID" 2>/dev/null; then
+            # Log the running PID number
             current_nice=$(ps -o nice= -p "$PID" | tr -d ' ')
             if [[ -n "$current_nice" && "$current_nice" != "-" && "$current_nice" =~ [0-9] ]]; then
                 grep -Fxq "$PID" "$pid_file" || echo "$PID" >> "$pid_file"
@@ -119,5 +130,6 @@ while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
             fi
         fi
     done
+    # Sleep time... Zzzzzz
     sleep 60
 done
