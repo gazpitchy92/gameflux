@@ -4,7 +4,7 @@ from pathlib import Path
 class MonitorApp:
     def __init__(self, root):
         root.title("Renice Gamemode Monitor")
-        root.iconphoto(True, tk.PhotoImage(file="/home/gareth/scripts/gamemode/ui/icon.png"))
+        root.iconphoto(True, tk.PhotoImage(file="/etc/gameflux/ui/icon.png"))
         root.geometry("500x700")
         root.configure(bg="#1e1e1e")
 
@@ -23,9 +23,9 @@ class MonitorApp:
         logs_frame.pack(side="bottom", fill="both", expand=True)
 
         self.logs = [
-            ("  Renice Logs", "/home/gareth/scripts/gamemode/logs/pid-log.txt"),
-            ("  Downgraded Programs", "/home/gareth/scripts/gamemode/flags/downgrade-pid.txt"),
-            ("  Upgraded Game PID", "/home/gareth/scripts/gamemode/flags/pid.txt"),
+            ("  Renice Logs", "/etc/gameflux/logs/pid-log.txt"),
+            ("  Downgraded Programs", "/etc/gameflux/flags/downgrade-pid.txt"),
+            ("  Upgraded Game PID", "/etc/gameflux/flags/pid.txt"),
         ]
 
         self.log_widgets = {}
@@ -49,7 +49,7 @@ class MonitorApp:
         return "false"
 
     def update_ui(self):
-        status = self.read_file("/home/gareth/scripts/gamemode/flags/status.txt")
+        status = self.read_file("/etc/gameflux/flags/status.txt")
         self.status_label.config(text=status)
 
         color = "#00ff00" if status == "true" else "#ff5555"

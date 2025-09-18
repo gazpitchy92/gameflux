@@ -7,5 +7,5 @@ get_sleep_values() {
         value=$(echo "$value" | xargs)
         declare -g "${key}=$value"
         echo "${key}=$value"
-    done < /home/gareth/scripts/gamemode/settings/wait_times.txt
+    done < /etc/gameflux/settings/wait_times.txt
 }

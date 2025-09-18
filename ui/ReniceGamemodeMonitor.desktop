@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Renice Gamemode Monitor
 Comment=Monitor Renice gamemode logs and status
-Exec=python3 /home/gareth/scripts/gamemode/ui/start.py
-Icon=/home/gareth/scripts/gamemode/ui/icon.png
+Exec=python3 /etc/gameflux/ui/start.py
+Icon=/etc/gameflux/ui/icon.png
 Terminal=false
 Type=Application
 Categories=Utility;

@@ -2,7 +2,7 @@
 
 update_scx() {
     if [ "$1" = "start" ]; then 
-        case "$(</home/gareth/scripts/gamemode/flags/scx.txt)" in
+        case "$(</etc/gameflux/flags/scx.txt)" in
             lavd)
                 kill_all_scx
                 sudo scx_lavd --performance &
@@ -42,5 +42,5 @@ kill_all_scx() {
         pids=$(pgrep -f "$s")
         [ -n "$pids" ] && sudo kill -9 $pids
     done
-    echo "none" > /home/gareth/scripts/gamemode/flags/scx.txt
+    echo "none" > /etc/gameflux/flags/scx.txt
 }

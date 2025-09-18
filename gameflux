@@ -1,10 +1,8 @@
 #!/bin/bash
 
-SCRIPT_DIR="/home/gareth/scripts/gamemode"
-
 # Flag files
-scx_file="$SCRIPT_DIR/flags/scx.txt"
-pid_file="$SCRIPT_DIR/flags/pid.txt"
+scx_file="/etc/gameflux/flags/scx.txt"
+pid_file="/etc/gameflux/flags/pid.txt"
 [ -f "$scx_file" ] || echo "none" > "$scx_file"
 : > "$pid_file"
 
@@ -48,8 +46,8 @@ for arg in "${args[@]}"; do
         game_root=$(dirname "$game_exe")
         win64_path=$(find "$game_root" -type d -name "Win64" ! -path "$game_root/Engine/*" | head -n 1)
         game_folder="$win64_path"
-        echo "Game exe: $arg" > /home/gareth/scripts/gamemode/logs/game.txt
-        echo "Game dir: $game_folder" >> /home/gareth/scripts/gamemode/logs/game.txt
+        echo "Game exe: $arg" > /etc/gameflux/logs/game.txt
+        echo "Game dir: $game_folder" >> /etc/gameflux/logs/game.txt
         break
     fi
 done
@@ -57,31 +55,31 @@ done
 # Install optiscalar 
 if [ "$fsr4_set" = true ]; then
     if [ ! -f "$game_folder/dxgi.dll" ]; then
-        cp -r /home/gareth/scripts/gamemode/OptiScaler/* "$game_folder/"
+        cp -r /etc/gameflux/OptiScaler/* "$game_folder/"
         if [ -f "$game_folder/dxgi.dll" ]; then
-            echo "OptiScaler copied successfully" >> /home/gareth/scripts/gamemode/logs/game.txt
+            echo "OptiScaler copied successfully" >> /etc/gameflux/logs/game.txt
         else
-            echo "OptiScaler copy failed" >> /home/gareth/scripts/gamemode/logs/game.txt
+            echo "OptiScaler copy failed" >> /etc/gameflux/logs/game.txt
         fi
     else
-        echo "OptiScaler already installed" >> /home/gareth/scripts/gamemode/logs/game.txt
+        echo "OptiScaler already installed" >> /etc/gameflux/logs/game.txt
     fi
 elif [ -f "$game_folder/dxgi.dll" ]; then
-    for item in /home/gareth/scripts/gamemode/OptiScaler/*; do
+    for item in /etc/gameflux/OptiScaler/*; do
         name=$(basename "$item")
-        echo "OptiScaler cleanup removing: $game_folder/$name" >> /home/gareth/scripts/gamemode/logs/game.txt
+        echo "OptiScaler cleanup removing: $game_folder/$name" >> /etc/gameflux/logs/game.txt
         rm -rf "$game_folder/$name"
     done
 fi
 
 # Log settings
 echo "$scx_set" > "$scx_file"
-echo "fsr4: $fsr4_set" >> /home/gareth/scripts/gamemode/logs/game.txt
-echo "rdna3: $rdna3_set" >> /home/gareth/scripts/gamemode/logs/game.txt
-echo "fsync: $fsync_set" >> /home/gareth/scripts/gamemode/logs/game.txt
-echo "scx: $scx_set" >> /home/gareth/scripts/gamemode/logs/game.txt
-echo "wayland: $wayland_set" >> /home/gareth/scripts/gamemode/logs/game.txt
-echo "other args: ${args[*]}" >> /home/gareth/scripts/gamemode/logs/game.txt
+echo "fsr4: $fsr4_set" >> /etc/gameflux/logs/game.txt
+echo "rdna3: $rdna3_set" >> /etc/gameflux/logs/game.txt
+echo "fsync: $fsync_set" >> /etc/gameflux/logs/game.txt
+echo "scx: $scx_set" >> /etc/gameflux/logs/game.txt
+echo "wayland: $wayland_set" >> /etc/gameflux/logs/game.txt
+echo "other args: ${args[*]}" >> /etc/gameflux/logs/game.txt
 
 # Setup ini
 if [ "$rdna3_set" = "true" ]; then
