@@ -1,24 +1,62 @@
 firefox-bin,15
+chrome,15
+chromium,15
+vivaldi,15
+brave,15
+opera,15
+msedge,15
+brave,15
+chromium,15
+chrome,15
+vivaldi,15
+opera,15
+msedge,15
+floorp,15
+firefox-bin,15
 Isolated Web Co,15
 Isolated Service,15
 Privileged Cont,15
 Web Content,15
 deskflow,15
-Discord,5
+Discord,15
 megasync,15
-crowdsec,15
-opensnitchd,15
-opensnitch-ui,15
+crowdsec,5
+opensnitchd,5
+opensnitch-ui,5
 codium,15
+vscode,15
 betterbird-bin,15
+thunderbird,15
 syncthing,15
-crowdsec-firewa,15
-deskflow-server,15
-coolercontrold,15
+crowdsec-firewa,5
+deskflow-server,5
+coolercontrold,5
 WebExtensions,15
-Socket Process,5
-Utility Process,5
+Socket Process,15
+Utility Process,15
 forkserver,15
-crashhelper,15
+crashhelper,5
 RDD Process,5
 teams-for-linux,15
+slack,15
+telegram-desktop,15
+signal-desktop,15
+zoom,15
+dropbox,15
+nextcloud,15
+onedrive,15
+google-drive-sync,15
+jetbrains-idea,15
+pycharm,15
+goland,15
+evolution,15
+mailspring,15
+obs,15
+gimp,15
+kdenlive,15
+blender,15
+krita,15
+inkscape,15
+vlc,15
+mpv,15
+audacity,15
