@@ -51,9 +51,9 @@ pycharm,15
 goland,15
 evolution,15
 mailspring,15
-obs,15
+obs,5
 gimp,15
-kdenlive,15
+kdenlive,5
 blender,15
 krita,15
 inkscape,15

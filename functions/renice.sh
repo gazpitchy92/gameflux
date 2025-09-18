@@ -6,91 +6,96 @@ get_steam_pid() {
         pgrep_opt="-f"
         [[ "$match" == "-x" ]] && pgrep_opt="-x"
         for pid in $(pgrep "$pgrep_opt" "$prog"); do
-            grep -Fxq "$pid" /etc/gameflux/flags/pid.txt || echo "$pid" >> /etc/gameflux/flags/pid.txt
+            grep -Fxq "$pid" $renice_flag || echo "$pid" >> $renice_flag
         done
     done < /etc/gameflux/settings/renice_upgrade.txt
 }
 
 check_update_renice() {
-    if [ "$(find /etc/gameflux/logs/pid-log.txt -mmin +$renice_refresh_time 2>/dev/null)" ]; then
-        update_renice update
-    else
-        echo "Renice on cooldown..."
+    if [ "$renice_updgrade_programs" = true ]; then
+        if [ "$(find $renice_logs -mmin +$renice_refresh_time_min 2>/dev/null)" ]; then
+            update_renice update
+        else
+            echo "Renice on cooldown..."
+        fi
     fi
 }
 
 update_renice() {
     if [ "$1" = "update" ]; then
         # Refresh logs
-        echo "START LOGS AT $(date '+%Y-%m-%d %H:%M:%S')" > /etc/gameflux/logs/pid-log.txt
+        echo "START RENICE LOGS AT $(date '+%Y-%m-%d %H:%M:%S')" > $renice_logs
         # Downgrade any background programs
         downgrade_programs_renice
         # Upgrade game related PID
         get_steam_pid
-        if [ -f /etc/gameflux/flags/pid.txt ]; then
+        if [ -f $renice_flag ]; then
             while read -r PID; do
                 if [[ $PID =~ ^[0-9]+$ ]]; then
                     if kill -0 "$PID" 2>/dev/null; then
                         current_nice=$(ps -o nice= -p "$PID" | tr -d ' ')
                         if [[ -n "$current_nice" && "$current_nice" != "-" && "$current_nice" =~ [0-9] ]]; then
-                            if [ "$current_nice" != "-20" ]; then
-                                sudo renice -n -20 -p "$PID" && \
-                                echo -e "UPGRADE PID $PID nice changed to -20, updated" >> /etc/gameflux/logs/pid-log.txt
+                            if [ "$current_nice" != "$renice_upgrade_value" ]; then
+                                sudo renice -n $renice_upgrade_value -p "$PID" && \
+                                echo -e "UPGRADE PID $PID nice changed to $renice_upgrade_value, updated" >> $renice_logs
                             else
-                                echo -e "UPGRADE PID $PID nice is already -20, no change" >> /etc/gameflux/logs/pid-log.txt
+                                echo -e "UPGRADE PID $PID nice is already $renice_upgrade_value, no change" >> $renice_logs
                             fi
                         else
-                            echo -e "UPGRADE PID $PID invalid nice value, skipping" >> /etc/gameflux/logs/pid-log.txt
-                            sed -i "/^${PID}$/d" /etc/gameflux/flags/pid.txt
+                            echo -e "UPGRADE PID $PID invalid nice value, skipping" >> $renice_logs
+                            sed -i "/^${PID}$/d" $renice_flag
                         fi
                     else
-                        echo -e "UPGRADE PID $PID no longer running, skipping" >> /etc/gameflux/logs/pid-log.txt
-                        sed -i "/^${PID}$/d" /etc/gameflux/flags/pid.txt
+                        echo -e "UPGRADE PID $PID no longer running, skipping" >> $renice_logs
+                        sed -i "/^${PID}$/d" $renice_flag
                     fi
                 fi
-                sleep "$renice_sleep_time"
-            done < /etc/gameflux/flags/pid.txt
+                sleep "$renice_sleep_time_sec"
+            done < $renice_flag
         fi
-        echo "FINISH LOGS AT $(date '+%Y-%m-%d %H:%M:%S')" >> /etc/gameflux/logs/pid-log.txt
+        echo "FINISH LOGS AT $(date '+%Y-%m-%d %H:%M:%S')" >> $renice_logs
     elif [ "$1" = "reset" ]; then
         # finish cleanup
         reset_programs_renice
-        pkill -9 -f rungame
-        > /etc/gameflux/flags/pid.txt
-        > /etc/gameflux/flags/downgrade-pid.txt
+        > $renice_flag
+        > $downgrade_flag
     fi
 }
 
 downgrade_programs_renice() {
-    while IFS=, read -r prog niceval; do
-        [[ -z "$prog" ]] && continue
-        pid=$(pgrep -x "$prog" | head -n1)
-        [[ -z "$pid" ]] && continue
-        orig=$(ps -o ni= -p "$pid" | tr -d ' ')
-        [[ ! "$orig" =~ ^-?[0-9]+$ ]] && orig=0
-        grep -q "^$prog," /etc/gameflux/flags/downgrade-pid.txt || echo "$prog,$orig" >> /etc/gameflux/flags/downgrade-pid.txt
-        for pid in $(pgrep -x "$prog"); do
-            sleep "$renice_sleep_time"
-            current=$(ps -o ni= -p "$pid" | tr -d ' ')
-            if [[ "$current" == "$niceval" ]]; then
-                echo -e "DOWNGRADE PID $pid is already nice $niceval, skipping" >> /etc/gameflux/logs/pid-log.txt
-                continue
-            fi
-            echo -e "DOWNGRADE PID $pid to nice $niceval" >> /etc/gameflux/logs/pid-log.txt
-            sudo renice -n "$niceval" -p "$pid"
-        done
-    done < /etc/gameflux/settings/renice_downgrade.txt
+    if [ "$renice_downgrade_programs" = true ]; then
+        while IFS=, read -r prog niceval; do
+            [[ -z "$prog" ]] && continue
+            pid=$(pgrep -x "$prog" | head -n1)
+            [[ -z "$pid" ]] && continue
+            orig=$(ps -o ni= -p "$pid" | tr -d ' ')
+            [[ ! "$orig" =~ ^-?[0-9]+$ ]] && orig=0
+            grep -q "^$prog," $downgrade_flag || echo "$prog,$orig" >> $downgrade_flag
+            for pid in $(pgrep -x "$prog"); do
+                sleep "$renice_sleep_time_sec"
+                current=$(ps -o ni= -p "$pid" | tr -d ' ')
+                if [[ "$current" == "$niceval" ]]; then
+                    echo -e "DOWNGRADE PID $pid is already nice $niceval, skipping" >> $renice_logs
+                    continue
+                fi
+                echo -e "DOWNGRADE PID $pid to nice $niceval" >> $renice_logs
+                sudo renice -n "$niceval" -p "$pid"
+            done
+        done < /etc/gameflux/settings/renice_downgrade.txt
+    fi
 }
 
 reset_programs_renice() {
-    [[ ! -f /etc/gameflux/flags/downgrade-pid.txt ]] && return
-    while IFS=, read -r prog orig; do
-        [[ "$orig" -gt 10 ]] && orig=0
-        for pid in $(pgrep -x "$prog"); do
-            echo -e "RESET PID $pid to nice $orig" >> /etc/gameflux/logs/pid-log.txt
-            sudo renice "$orig" -p "$pid"
-        done
-    done < /etc/gameflux/flags/downgrade-pid.txt
-    > /etc/gameflux/flags/downgrade-pid.txt
-    echo "ENDED AT $(date '+%Y-%m-%d %H:%M:%S')" >> /etc/gameflux/logs/pid-log.txt
+    if [ "$renice_downgrade_programs" = true ]; then
+        [[ ! -f $downgrade_flag ]] && return
+        while IFS=, read -r prog orig; do
+            [[ "$orig" -gt 10 ]] && orig=0
+            for pid in $(pgrep -x "$prog"); do
+                echo -e "RESET PID $pid to nice $orig" >> $renice_logs
+                sudo renice "$orig" -p "$pid"
+            done
+        done < $downgrade_flag
+        > $downgrade_flag
+        echo "ENDED AT $(date '+%Y-%m-%d %H:%M:%S')" >> $renice_logs
+    fi 
 }

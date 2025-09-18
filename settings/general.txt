@@ -1,0 +1,7 @@
+refresh_time,5
+renice_refresh_time_min,1
+renice_sleep_time_sec,0.25
+renice_upgrade_value,-15
+renice_downgrade_programs,true
+renice_updgrade_programs,true
+disable_ananicy_service,true

@@ -5,21 +5,15 @@ source "/etc/gameflux/functions/scx.sh"
 source "/etc/gameflux/functions/renice.sh"
 source "/etc/gameflux/functions/services.sh"
 source "/etc/gameflux/functions/system.sh"
+source "/etc/gameflux/functions/settings.sh"
 
-# Setup config and flag files
-echo "false" > "/etc/gameflux/flags/status.txt"
-current_state="normal"
-get_sleep_values
-
-# Reset log files
-> "/etc/gameflux/flags/pid.txt"
-> "/etc/gameflux/flags/downgrade-pid.txt"
-> "/etc/gameflux/logs/pid-log.txt"
+# Setup files
+setup_service_files
 
 # Main mode switching function
 # Params: gaming | general
 update_mode() {
-    echo "Updating to mode $1"
+    echo "Updating to mode $1" >> "$service_logs"
     # Start gaming mode
     if [ "$1" = "gaming" ]; then
         update_anaicy stop # Stop any instances of anaicy service
@@ -35,7 +29,7 @@ update_mode() {
 
 # Main loop to check for running games
 while true; do
-    if grep -q "true" "/etc/gameflux/flags/status.txt"; then
+    if grep -q "true" "$status_flag"; then
         # Game is running
         if [ "$current_state" != "gamemode" ]; then
             # The game jsut launched
@@ -52,6 +46,6 @@ while true; do
         fi
     fi
     # Sleep time... Zzzzzz
-    echo "Waiting $loop_time seconds"
-    sleep "$loop_time"
+    echo "Waiting $refresh_time seconds"
+    sleep "$refresh_time"
 done

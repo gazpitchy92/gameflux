@@ -23,9 +23,9 @@ class MonitorApp:
         logs_frame.pack(side="bottom", fill="both", expand=True)
 
         self.logs = [
-            ("  Renice Logs", "/etc/gameflux/logs/pid-log.txt"),
-            ("  Downgraded Programs", "/etc/gameflux/flags/downgrade-pid.txt"),
-            ("  Upgraded Game PID", "/etc/gameflux/flags/pid.txt"),
+            ("  Renice Logs", "$renice_logs"),
+            ("  Downgraded Programs", "$downgrade_flag"),
+            ("  Upgraded Game PID", "$renice_flag"),
         ]
 
         self.log_widgets = {}
@@ -49,7 +49,7 @@ class MonitorApp:
         return "false"
 
     def update_ui(self):
-        status = self.read_file("/etc/gameflux/flags/status.txt")
+        status = self.read_file("$status_flag")
         self.status_label.config(text=status)
 
         color = "#00ff00" if status == "true" else "#ff5555"

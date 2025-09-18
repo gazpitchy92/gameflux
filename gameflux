@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# Flag files
-scx_file="/etc/gameflux/flags/scx.txt"
-pid_file="/etc/gameflux/flags/pid.txt"
-[ -f "$scx_file" ] || echo "none" > "$scx_file"
-: > "$pid_file"
+# Includes
+source "/etc/gameflux/functions/optiscaler.sh"
+source "/etc/gameflux/functions/settings.sh"
 
-# Clear ram buffer
-echo 3 | sudo tee /proc/sys/vm/drop_caches
+# Setup files
+setup_runner_files
 
 # Parse given flags
 args=()
@@ -32,6 +30,7 @@ for arg in "$@"; do
             ;;
         --scx=none|--scx=lavd|--scx=bpfland|--scx=cosmos|--scx=rusty|--scx=p2dq|--scx=flash)
             scx_set="${arg#--scx=}"
+            echo "$scx_set" > "$scx_file"
             ;;
         *)
             args+=("$arg")
@@ -46,47 +45,20 @@ for arg in "${args[@]}"; do
         game_root=$(dirname "$game_exe")
         win64_path=$(find "$game_root" -type d -name "Win64" ! -path "$game_root/Engine/*" | head -n 1)
         game_folder="$win64_path"
-        echo "Game exe: $arg" > /etc/gameflux/logs/game.txt
-        echo "Game dir: $game_folder" >> /etc/gameflux/logs/game.txt
+        echo "Game exe: $arg" > $game_logs
+        echo "Game dir: $game_folder" >> $game_logs
         break
     fi
 done
 
 # Install optiscalar 
-if [ "$fsr4_set" = true ]; then
-    if [ ! -f "$game_folder/dxgi.dll" ]; then
-        cp -r /etc/gameflux/OptiScaler/* "$game_folder/"
-        if [ -f "$game_folder/dxgi.dll" ]; then
-            echo "OptiScaler copied successfully" >> /etc/gameflux/logs/game.txt
-        else
-            echo "OptiScaler copy failed" >> /etc/gameflux/logs/game.txt
-        fi
-    else
-        echo "OptiScaler already installed" >> /etc/gameflux/logs/game.txt
-    fi
-elif [ -f "$game_folder/dxgi.dll" ]; then
-    for item in /etc/gameflux/OptiScaler/*; do
-        name=$(basename "$item")
-        echo "OptiScaler cleanup removing: $game_folder/$name" >> /etc/gameflux/logs/game.txt
-        rm -rf "$game_folder/$name"
-    done
-fi
+install_optiscaler
 
 # Log settings
-echo "$scx_set" > "$scx_file"
-echo "fsr4: $fsr4_set" >> /etc/gameflux/logs/game.txt
-echo "rdna3: $rdna3_set" >> /etc/gameflux/logs/game.txt
-echo "fsync: $fsync_set" >> /etc/gameflux/logs/game.txt
-echo "scx: $scx_set" >> /etc/gameflux/logs/game.txt
-echo "wayland: $wayland_set" >> /etc/gameflux/logs/game.txt
-echo "other args: ${args[*]}" >> /etc/gameflux/logs/game.txt
+log_gameflux_settings
 
 # Setup ini
-if [ "$rdna3_set" = "true" ]; then
-    # TO DO : Update .ini file with flags to enable rdna3
-else
-    # TO DO : Update .ini file with flags to disable rdna3
-fi
+setup_optiscaler_ini
  
 # Build run variables
 envs=()
@@ -108,12 +80,15 @@ else
     # TO DO : Update .ini file with flags to disable rdna3
 fi
 
+# Clear RAM buffer
+echo 3 | sudo tee /proc/sys/vm/drop_caches
+
 # Launch the game
 env "${envs[@]}" gamemoderun "${args[@]}" &
 
 # Log game PID numbers whilst running
 GAMEMODE_PID=$!
-echo "$GAMEMODE_PID" > "$pid_file"
+echo "$GAMEMODE_PID" > "$renice_flag"
 sleep 15
 while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
     GAME_PIDS=$(pgrep -P "$GAMEMODE_PID")
@@ -123,7 +98,7 @@ while kill -0 "$GAMEMODE_PID" 2>/dev/null; do
             # Log the running PID number
             current_nice=$(ps -o nice= -p "$PID" | tr -d ' ')
             if [[ -n "$current_nice" && "$current_nice" != "-" && "$current_nice" =~ [0-9] ]]; then
-                grep -Fxq "$PID" "$pid_file" || echo "$PID" >> "$pid_file"
+                grep -Fxq "$PID" "$renice_flag" || echo "$PID" >> "$renice_flag"
                 sleep 0.5
             fi
         fi
